@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Costos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .contenedor { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; }
+        .input-group { margin-bottom: 10px; }
+        button { margin-top: 15px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="boleta" class="contenedor">
+        <h2>Presupuesto de Proyecto</h2>
+        
+        <div class="input-group">
+            <label>Costo de Materiales ($):</label>
+            <input type="number" id="materiales" value="0" oninput="calcular()">
+        </div>
+        
+        <div class="input-group">
+            <label>Costo de Mano de Obra ($):</label>
+            <input type="number" id="manoObra" value="0" oninput="calcular()">
+        </div>
+
+        <hr>
+        <h3>Total a cobrar: $<span id="total">0</span></h3>
+    </div>
+
+    <div style="text-align: center;">
+        <button onclick="descargarPDF()">Descargar como PDF</button>
+    </div>
+
+    <script>
+        // Función para sumar los costos en tiempo real
+        function calcular() {
+            const materiales = parseFloat(document.getElementById('materiales').value) || 0;
+            const manoObra = parseFloat(document.getElementById('manoObra').value) || 0;
+            const total = materiales + manoObra;
+            document.getElementById('total').innerText = total.toFixed(2);
+        }
+
+        // Función para exportar a PDF
+        function descargarPDF() {
+            const elemento = document.getElementById('boleta'); // Seleccionamos qué parte imprimir
+            const opciones = {
+                margin:       10,
+                filename:     'presupuesto_costos.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Ejecutamos la librería
+            html2pdf().set(opciones).from(elemento).save();
+        }
+    </script>
+
+</body>
+</html>
