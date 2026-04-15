@@ -80,6 +80,38 @@
             padding-top: 10px;
             margin-top: 10px;
         }
+        
+        /* --- ESTILOS PARA LOS NUEVOS BOTONES --- */
+        .botones-accion {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-limpiar {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-limpiar:hover {
+            background-color: #7f8c8d;
+        }
+        .btn-imprimir {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-imprimir:hover {
+            background-color: #2980b9;
+        }
+
         .footer-warning {
             text-align: center;
             margin-top: 30px;
@@ -90,6 +122,23 @@
             border-radius: 4px;
             font-size: 0.9em;
             letter-spacing: 1px;
+        }
+
+        /* --- ESTILOS ESPECIALES PARA CUANDO SE IMPRIME --- */
+        @media print {
+            body {
+                /* Fuerza a la impresora a imprimir los colores de fondo */
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background-color: white;
+            }
+            .container {
+                box-shadow: none; /* Quitamos la sombra para que se vea más limpio en papel */
+                padding: 0;
+            }
+            .botones-accion {
+                display: none; /* ¡La magia! Oculta los botones en la versión impresa */
+            }
         }
     </style>
 </head>
@@ -182,6 +231,11 @@
         </div>
     </div>
 
+    <div class="botones-accion">
+        <button class="btn btn-limpiar" onclick="limpiarValores()">Limpiar Valores</button>
+        <button class="btn btn-imprimir" onclick="imprimirCotizacion()">Imprimir Cotización</button>
+    </div>
+
     <div class="footer-warning">
         SOLO DE USO INTERNO Y NO ENVIAR FUERA DE LA ORGANIZACIÓN
     </div>
@@ -196,54 +250,64 @@
 
     // Función principal que calcula todos los costos
     function calcularTotal() {
-        // 1. Datos Escáner
         const precioEscanerDia = parseFloat(document.getElementById('tipo_escaner').value) || 0;
         const diasEscaner = parseFloat(document.getElementById('dias_escaner').value) || 0;
         const subtotalEscaner = precioEscanerDia * diasEscaner;
 
-        // 2. Datos Operadores
         const numOperadores = parseFloat(document.getElementById('num_operadores').value) || 0;
         const diasOperador = parseFloat(document.getElementById('dias_operador').value) || 0;
         const costoPorOperadorDia = 100000;
         const subtotalOperadores = numOperadores * diasOperador * costoPorOperadorDia;
 
-        // 3. Gastos de Viaje
         const costoPasajes = parseFloat(document.getElementById('costo_pasajes').value) || 0;
         const nochesHotel = parseFloat(document.getElementById('noches_hotel').value) || 0;
         const costoNocheHotel = parseFloat(document.getElementById('costo_noche_hotel').value) || 0;
         const subtotalHotel = nochesHotel * costoNocheHotel;
         
-        // Costos fijos de viaje por día/operador
         const costoComidaDiaOperador = 40000; 
         const subtotalComida = costoComidaDiaOperador * diasOperador * numOperadores;
         
-        // Costo fijo de traslado (asumimos $100k por el día de trabajo global, independiente de la cant. de operadores)
         const costoTrasladoDia = 100000;
         const subtotalTraslado = costoTrasladoDia * diasOperador;
 
         const subtotalViajes = costoPasajes + subtotalHotel + subtotalComida + subtotalTraslado;
 
-        // 4. Seguro Complementario
         const montoSeguroBase = parseFloat(document.getElementById('monto_seguro').value) || 0;
         const subtotalSeguro = montoSeguroBase * numOperadores;
 
-        // 5. Otros y Utilidad
         const montoOtros = parseFloat(document.getElementById('monto_otros').value) || 0;
         const porcentajeUtilidad = parseFloat(document.getElementById('porcentaje_utilidad').value) || 0;
 
-        // Sumatoria de Subtotal
         const subtotalNeto = subtotalEscaner + subtotalOperadores + subtotalViajes + subtotalSeguro + montoOtros;
-        
-        // Cálculo de Utilidad
         const montoUtilidad = subtotalNeto * (porcentajeUtilidad / 100);
-
-        // Total Final
         const totalFinal = subtotalNeto + montoUtilidad;
 
-        // Actualizar valores en la pantalla
         document.getElementById('txt_subtotal').innerText = formatearMoneda(subtotalNeto);
         document.getElementById('txt_utilidad').innerText = formatearMoneda(montoUtilidad);
         document.getElementById('txt_total').innerText = formatearMoneda(totalFinal);
+    }
+
+    // NUEVA FUNCIÓN: Limpiar todos los valores y dejarlos en 0
+    function limpiarValores() {
+        // Seleccionamos todos los campos de tipo número y los ponemos en 0
+        const camposNumericos = document.querySelectorAll('input[type="number"]');
+        camposNumericos.forEach(campo => {
+            campo.value = 0;
+        });
+        
+        // Limpiamos el texto de la descripción
+        document.getElementById('desc_otros').value = '';
+        
+        // Volvemos el selector del escáner a la primera opción
+        document.getElementById('tipo_escaner').selectedIndex = 0;
+        
+        // Ejecutamos el cálculo de nuevo para que todo marque $0
+        calcularTotal();
+    }
+
+    // NUEVA FUNCIÓN: Abrir la ventana de impresión
+    function imprimirCotizacion() {
+        window.print();
     }
 
     // Ejecutar el cálculo al cargar la página por primera vez
