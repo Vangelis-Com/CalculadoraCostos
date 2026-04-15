@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presupuesto Escáner Láser</title>
     <style>
-        /* --- ESTILOS CSS --- */
+        /* --- ESTILOS CSS GENERALES --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
@@ -81,7 +81,7 @@
             margin-top: 10px;
         }
         
-        /* --- ESTILOS PARA LOS NUEVOS BOTONES --- */
+        /* --- ESTILOS PARA LOS BOTONES --- */
         .botones-accion {
             display: flex;
             justify-content: center;
@@ -126,18 +126,49 @@
 
         /* --- ESTILOS ESPECIALES PARA CUANDO SE IMPRIME --- */
         @media print {
+            /* Achicamos la escala general al 85% para asegurar que entre en una hoja */
+            html {
+                zoom: 0.85; 
+            }
             body {
-                /* Fuerza a la impresora a imprimir los colores de fondo */
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
                 background-color: white;
-            }
-            .container {
-                box-shadow: none; /* Quitamos la sombra para que se vea más limpio en papel */
+                margin: 0;
                 padding: 0;
             }
+            .container {
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+                max-width: 100%;
+            }
+            /* Reducimos los espacios interiores y exteriores de las secciones */
+            .section {
+                padding: 10px 15px;
+                margin-top: 10px;
+                /* Esta regla evita que una sección se corte a la mitad si la hoja se acaba */
+                page-break-inside: avoid; 
+            }
+            .section h2 {
+                margin-bottom: 10px;
+            }
+            .form-group {
+                margin-bottom: 8px; /* Juntamos un poco más las líneas */
+            }
+            .form-group input, .form-group select {
+                padding: 6px; /* Hacemos las cajas de texto un poco más pequeñas */
+            }
+            .results {
+                margin-top: 15px;
+                padding: 15px;
+            }
+            .footer-warning {
+                margin-top: 15px;
+                padding: 10px;
+            }
             .botones-accion {
-                display: none; /* ¡La magia! Oculta los botones en la versión impresa */
+                display: none; /* Oculta los botones en la versión impresa */
             }
         }
     </style>
@@ -189,7 +220,7 @@
             <label for="costo_noche_hotel">Costo por Noche de Hotel:</label>
             <input type="number" id="costo_noche_hotel" value="0" min="0" oninput="calcularTotal()">
         </div>
-        <p><em>Nota: Comida ($40k por día/operador) y Traslado ($100k por día) se calculan automáticamente según los días de trabajo.</em></p>
+        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;"><em>Nota: Comida ($40k/día por operador) y Traslado ($100k/día) se calculan automáticamente.</em></p>
     </div>
 
     <div class="section">
@@ -243,12 +274,10 @@
 </div>
 
 <script>
-    // Función para formatear números como moneda (Pesos)
     const formatearMoneda = (valor) => {
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
     };
 
-    // Función principal que calcula todos los costos
     function calcularTotal() {
         const precioEscanerDia = parseFloat(document.getElementById('tipo_escaner').value) || 0;
         const diasEscaner = parseFloat(document.getElementById('dias_escaner').value) || 0;
@@ -287,30 +316,22 @@
         document.getElementById('txt_total').innerText = formatearMoneda(totalFinal);
     }
 
-    // NUEVA FUNCIÓN: Limpiar todos los valores y dejarlos en 0
     function limpiarValores() {
-        // Seleccionamos todos los campos de tipo número y los ponemos en 0
         const camposNumericos = document.querySelectorAll('input[type="number"]');
         camposNumericos.forEach(campo => {
             campo.value = 0;
         });
         
-        // Limpiamos el texto de la descripción
         document.getElementById('desc_otros').value = '';
-        
-        // Volvemos el selector del escáner a la primera opción
         document.getElementById('tipo_escaner').selectedIndex = 0;
         
-        // Ejecutamos el cálculo de nuevo para que todo marque $0
         calcularTotal();
     }
 
-    // NUEVA FUNCIÓN: Abrir la ventana de impresión
     function imprimirCotizacion() {
         window.print();
     }
 
-    // Ejecutar el cálculo al cargar la página por primera vez
     window.onload = calcularTotal;
 </script>
 
